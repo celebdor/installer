@@ -8,6 +8,8 @@ import (
 	"github.com/pkg/errors"
 	survey "gopkg.in/AlecAivazis/survey.v1"
 
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions"
+	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/openshift/installer/pkg/ipnet"
 	"github.com/openshift/installer/pkg/types/openstack"
 	openstackvalidation "github.com/openshift/installer/pkg/types/openstack/validation"
@@ -16,6 +18,39 @@ import (
 var (
 	defaultNetworkCIDR = ipnet.MustParseCIDR("10.0.0.0/16")
 )
+
+func getExtension(cloud string, alias string) (extension *extensions.Extension, err error) {
+	opts := &clientconfig.ClientOpts{
+		Cloud: cloud,
+	}
+
+	conn, err := clientconfig.NewServiceClient("network", opts)
+	if err != nil {
+		return nil, err
+	}
+
+	allPages, err := extensions.List(conn).AllPages()
+	if err != nil {
+		return extension, err
+	}
+
+	allExts, err := extensions.ExtractExtensions(allPages)
+	if err != nil {
+		return extension, err
+	}
+
+	for _, ext := range allExts {
+		if ext.Alias == alias {
+			extension = &ext
+			break
+		}
+	}
+	if extension == nil {
+		err = errors.Errorf("Extension with alias %s was not found", alias)
+	}
+
+	return extension, err
+}
 
 // Platform collects OpenStack-specific configuration.
 func Platform() (*openstack.Platform, error) {
@@ -159,6 +194,14 @@ func Platform() (*openstack.Platform, error) {
 		return nil, err
 	}
 
+	_, err = getExtension(cloud, "trunk")
+	var trunkSupport string
+	if err == nil {
+		trunkSupport = "0"
+	} else {
+		trunkSupport = "1"
+	}
+
 	return &openstack.Platform{
 		NetworkCIDRBlock: *defaultNetworkCIDR,
 		Region:           region,
@@ -166,5 +209,6 @@ func Platform() (*openstack.Platform, error) {
 		Cloud:            cloud,
 		ExternalNetwork:  extNet,
 		FlavorName:       flavor,
+		TrunkSupport:     trunkSupport,
 	}, nil
 }
