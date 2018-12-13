@@ -159,6 +159,19 @@ func Platform() (*openstack.Platform, error) {
 		return nil, err
 	}
 
+	netExts, err := validValuesFetcher.GetNetworkExtensionsAliases(cloud)
+	if err != nil {
+		return nil, err
+	}
+	sort.Strings(netExts)
+	i := sort.SearchStrings(netExts, "trunk")
+	var trunkSupport string
+	if i == len(netExts) || netExts[i] != "trunk" {
+		trunkSupport = "0"
+	} else {
+		trunkSupport = "1"
+	}
+
 	return &openstack.Platform{
 		NetworkCIDRBlock: *defaultNetworkCIDR,
 		Region:           region,
@@ -166,5 +179,6 @@ func Platform() (*openstack.Platform, error) {
 		Cloud:            cloud,
 		ExternalNetwork:  extNet,
 		FlavorName:       flavor,
+		TrunkSupport:     trunkSupport,
 	}, nil
 }
