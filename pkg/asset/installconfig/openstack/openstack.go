@@ -7,6 +7,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/regions"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/pkg/errors"
@@ -126,6 +127,39 @@ func getNetworkNames(cloud string) ([]string, error) {
 	return networkNames, nil
 }
 
+func getExtension(cloud string, alias string) (extension *extensions.Extension, err error) {
+	opts := &clientconfig.ClientOpts{
+		Cloud: cloud,
+	}
+
+	conn, err := clientconfig.NewServiceClient("network", opts)
+	if err != nil {
+		return nil, err
+	}
+
+	allPages, err := extensions.List(conn).AllPages()
+	if err != nil {
+		return extension, err
+	}
+
+	allExts, err := extensions.ExtractExtensions(allPages)
+	if err != nil {
+		return extension, err
+	}
+
+	for _, ext := range allExts {
+		if ext.Alias == alias {
+			extension = &ext
+			break
+		}
+	}
+	if extension == nil {
+		err = errors.Errorf("Extension with alias %s was not found", alias)
+	}
+
+	return extension, err
+}
+
 // Platform collects OpenStack-specific configuration.
 func Platform() (*openstack.Platform, error) {
 	cloudNames, err := getCloudNames()
@@ -234,11 +268,20 @@ func Platform() (*openstack.Platform, error) {
 		return nil, errors.Wrapf(err, "failed to Marshal %s platform", openstack.Name)
 	}
 
+	trunkExt, err := getExtension(cloud, "trunk")
+	var trunkSupport string
+	if err == nil {
+		trunkSupport = "0"
+	} else {
+		trunkSupport = "1"
+	}
+
 	return &openstack.Platform{
 		NetworkCIDRBlock: defaultVPCCIDR,
 		Region:           region,
 		BaseImage:        image,
 		Cloud:            cloud,
 		ExternalNetwork:  extNet,
+		TrunkSupport:     trunkSupport,
 	}, nil
 }

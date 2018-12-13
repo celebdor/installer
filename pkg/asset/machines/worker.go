@@ -37,6 +37,14 @@ func defaultOpenStackMachinePoolPlatform() openstacktypes.MachinePool {
 	}
 }
 
+func trunkSupportBoolean(trunkSupport string) (result bool) {
+	if trunkSupport == "1" {
+		result = true
+	} else {
+		result = false
+	}
+}
+
 // Worker generates the machinesets for `worker` machine pool.
 type Worker struct {
 	MachineSetRaw     []byte
@@ -130,6 +138,7 @@ func (w *Worker) Generate(dependencies asset.Parents) error {
 			Image:       ic.Platform.OpenStack.BaseImage,
 			Region:      ic.Platform.OpenStack.Region,
 			Machine:     defaultOpenStackMachinePoolPlatform(),
+			Trunk:       trunkSupportBoolean(ic.Platform.OpenStack.TrunkSupport),
 		}
 
 		tags := map[string]string{

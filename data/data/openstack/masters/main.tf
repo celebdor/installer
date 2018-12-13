@@ -17,7 +17,7 @@ resource "openstack_compute_instance_v2" "master_conf" {
   user_data       = "${var.user_data_ign}"
 
   network = {
-    port = "${var.subnet_ids[count.index]}"
+    port = "${var.master_port_ids[count.index]}"
   }
 
   metadata {

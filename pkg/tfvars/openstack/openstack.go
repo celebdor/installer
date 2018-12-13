@@ -10,6 +10,7 @@ type OpenStack struct {
 	Master           `json:",inline"`
 	Region           string `json:"openstack_region,omitempty"`
 	NetworkCIDRBlock string `json:"openstack_network_cidr_block,omitempty"`
+	Trunk            string `json:"openstack_trunk_support,omitempty"`
 }
 
 // External converts external related config.

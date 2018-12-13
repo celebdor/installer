@@ -26,4 +26,8 @@ type Platform struct {
 	// ExternalNetwork
 	// The OpenStack external network to be used for installation.
 	ExternalNetwork string `json:"externalNetwork"`
+
+	// TrunkSupport
+	// Whether OpenStack ports can be trunked
+	TrunkSupport string `json:"trunkSupport"`
 }
