@@ -64,7 +64,7 @@ items:
               - "{{$c.ClusterName}}_master_sg"
         userDataSecret:
           name: master-user-data
-        trunk: {{.Trunk}}
+        trunk: {{$c.Trunk}}
     versions:
       kubelet: ""
       controlPlane: ""

@@ -42,7 +42,7 @@ resource "openstack_networking_port_v2" "masters" {
 resource "openstack_networking_trunk_v2" "masters" {
   name  = "master-trunk-${count.index}"
   count = "${var.trunk_support ? var.masters_count : 0}"
-  tags  = ["tectonicClusterID=${var.cluster_id}", "openshiftClusterID=${var.cluster_id}"]
+  tags  = ["openshiftClusterID=${var.cluster_id}"]
 
   admin_state_up = "true"
   port_id        = "${openstack_networking_port_v2.masters[count.index].id}"
