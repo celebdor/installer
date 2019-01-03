@@ -206,7 +206,7 @@
   revision = "2ad0228349b2d3b487a2ada25d1a0eb40d73b7d1"
 
 [[projects]]
-  digest = "1:54d36727a1d852a38be8b8dbcfbae6aa99130d793d63dabc865f150b690144af"
+  digest = "1:f7d68dc9478e68c7c21dce174b54528370a2feb8a3481954a7dcb68a329e5989"
   name = "github.com/gophercloud/gophercloud"
   packages = [
     ".",
@@ -214,7 +214,9 @@
     "openstack",
     "openstack/blockstorage/extensions/volumeactions",
     "openstack/blockstorage/v1/volumes",
+    "openstack/blockstorage/v2/snapshots",
     "openstack/blockstorage/v2/volumes",
+    "openstack/blockstorage/v3/snapshots",
     "openstack/blockstorage/v3/volumes",
     "openstack/compute/v2/extensions/attachinterfaces",
     "openstack/compute/v2/extensions/availabilityzones",
@@ -284,6 +286,8 @@
     "openstack/objectstorage/v1/containers",
     "openstack/objectstorage/v1/objects",
     "openstack/objectstorage/v1/swauth",
+    "openstack/sharedfilesystems/v2/securityservices",
+    "openstack/sharedfilesystems/v2/sharenetworks",
     "openstack/utils",
     "pagination",
   ]
@@ -418,12 +422,12 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:08d640f9d1ab3f57c30971280a3d02f868447a152e99c477d520d0e0c90e66f2"
+  digest = "1:159388318e9271200ec81f3207b57ec2b36be12195db9b4ed5efacf0a08eb6a3"
   name = "github.com/terraform-providers/terraform-provider-openstack"
   packages = ["openstack"]
   pruneopts = "NUT"
-  revision = "508765e66992e6c813f4ca7762d6e94c32379754"
-  version = "v1.12.0"
+  revision = "27ccfdac401b3a74c8892b79dfbc1d8389e6ef7e"
+  version = "v1.13.0"
 
 [[projects]]
   branch = "master"

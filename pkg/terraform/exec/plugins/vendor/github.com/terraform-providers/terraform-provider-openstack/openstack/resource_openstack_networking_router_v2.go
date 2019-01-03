@@ -40,6 +40,11 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+			},
 			"admin_state_up": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -143,6 +148,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 	createOpts := RouterCreateOpts{
 		routers.CreateOpts{
 			Name:                  d.Get("name").(string),
+			Description:           d.Get("description").(string),
 			TenantID:              d.Get("tenant_id").(string),
 			AvailabilityZoneHints: resourceNetworkingAvailabilityZoneHintsV2(d),
 		},
@@ -273,6 +279,7 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] Retrieved Router %s: %+v", d.Id(), n)
 
 	d.Set("name", n.Name)
+	d.Set("description", n.Description)
 	d.Set("admin_state_up", n.AdminStateUp)
 	d.Set("distributed", n.Distributed)
 	d.Set("tenant_id", n.TenantID)
@@ -314,11 +321,19 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	var hasChange bool
 	var updateOpts routers.UpdateOpts
 	if d.HasChange("name") {
+		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
 	}
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
+	}
 	if d.HasChange("admin_state_up") {
+		hasChange = true
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
 	}
@@ -371,14 +386,16 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if updateGatewaySettings {
+		hasChange = true
 		updateOpts.GatewayInfo = &gatewayInfo
 	}
 
-	log.Printf("[DEBUG] Updating Router %s with options: %+v", d.Id(), updateOpts)
-
-	_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error updating OpenStack Neutron Router: %s", err)
+	if hasChange {
+		log.Printf("[DEBUG] Updating Router %s with options: %+v", d.Id(), updateOpts)
+		_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron Router: %s", err)
+		}
 	}
 
 	if d.HasChange("tags") {

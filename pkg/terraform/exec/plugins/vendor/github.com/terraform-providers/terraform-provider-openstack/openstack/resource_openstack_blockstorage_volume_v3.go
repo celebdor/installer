@@ -228,9 +228,11 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
+	name := d.Get("name").(string)
+	description := d.Get("description").(string)
 	updateOpts := volumes.UpdateOpts{
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
+		Name:        &name,
+		Description: &description,
 	}
 
 	if d.HasChange("metadata") {
@@ -249,7 +251,7 @@ func resourceBlockStorageVolumeV3Update(d *schema.ResourceData, meta interface{}
 		if v.Status == "in-use" {
 			if !d.Get("enable_online_resize").(bool) {
 				return fmt.Errorf(
-					`Error extending volume (%s), 
+					`Error extending volume (%s),
 					volume is attached to the instance and
 					resizing online is disabled,
 					see enable_online_resize option`, d.Id())
@@ -340,7 +342,7 @@ func resourceBlockStorageVolumeV3Delete(d *schema.ResourceData, meta interface{}
 	// in a "deleting" state from when the instance was terminated.
 	// If this is true, just move on. It'll eventually delete.
 	if v.Status != "deleting" {
-		if err := volumes.Delete(blockStorageClient, d.Id()).ExtractErr(); err != nil {
+		if err := volumes.Delete(blockStorageClient, d.Id(), nil).ExtractErr(); err != nil {
 			return CheckDeleted(d, err, "volume")
 		}
 	}

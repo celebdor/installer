@@ -75,7 +75,6 @@ func resourceListenerV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"description": &schema.Schema{
@@ -213,14 +212,20 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	var updateOpts listeners.UpdateOpts
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 	if d.HasChange("description") {
-		updateOpts.Description = d.Get("description").(string)
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 	if d.HasChange("connection_limit") {
 		connLimit := d.Get("connection_limit").(int)
 		updateOpts.ConnLimit = &connLimit
+	}
+	if d.HasChange("default_pool_id") {
+		defaultPoolID := d.Get("default_pool_id").(string)
+		updateOpts.DefaultPoolID = &defaultPoolID
 	}
 	if d.HasChange("default_tls_container_ref") {
 		updateOpts.DefaultTlsContainerRef = d.Get("default_tls_container_ref").(string)

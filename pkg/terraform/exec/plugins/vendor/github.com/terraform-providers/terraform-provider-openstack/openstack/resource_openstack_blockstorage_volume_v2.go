@@ -219,9 +219,11 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Error creating OpenStack block storage client: %s", err)
 	}
 
+	name := d.Get("name").(string)
+	description := d.Get("description").(string)
 	updateOpts := volumes.UpdateOpts{
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
+		Name:        &name,
+		Description: &description,
 	}
 
 	if d.HasChange("metadata") {
@@ -283,7 +285,7 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 	// in a "deleting" state from when the instance was terminated.
 	// If this is true, just move on. It'll eventually delete.
 	if v.Status != "deleting" {
-		if err := volumes.Delete(blockStorageClient, d.Id()).ExtractErr(); err != nil {
+		if err := volumes.Delete(blockStorageClient, d.Id(), nil).ExtractErr(); err != nil {
 			return CheckDeleted(d, err, "volume")
 		}
 	}

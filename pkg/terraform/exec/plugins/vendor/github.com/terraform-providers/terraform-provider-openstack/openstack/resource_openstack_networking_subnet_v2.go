@@ -51,6 +51,11 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+			},
 			"tenant_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -171,6 +176,7 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 		subnets.CreateOpts{
 			NetworkID:       d.Get("network_id").(string),
 			Name:            d.Get("name").(string),
+			Description:     d.Get("description").(string),
 			TenantID:        d.Get("tenant_id").(string),
 			IPv6AddressMode: d.Get("ipv6_address_mode").(string),
 			IPv6RAMode:      d.Get("ipv6_ra_mode").(string),
@@ -257,6 +263,7 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("cidr", s.CIDR)
 	d.Set("ip_version", s.IPVersion)
 	d.Set("name", s.Name)
+	d.Set("description", s.Description)
 	d.Set("tenant_id", s.TenantID)
 	d.Set("dns_nameservers", s.DNSNameservers)
 	d.Set("host_routes", s.HostRoutes)
@@ -301,13 +308,22 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating OpenStack networking client: %s", err)
 	}
 
+	var hasChange bool
 	var updateOpts subnets.UpdateOpts
 
 	if d.HasChange("name") {
+		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
 	}
 
+	if d.HasChange("description") {
+		hasChange = true
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
+	}
+
 	if d.HasChange("gateway_ip") {
+		hasChange = true
 		updateOpts.GatewayIP = nil
 		if v, ok := d.GetOk("gateway_ip"); ok {
 			gatewayIP := v.(string)
@@ -317,6 +333,7 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 
 	if d.HasChange("no_gateway") {
 		if d.Get("no_gateway").(bool) {
+			hasChange = true
 			gatewayIP := ""
 			updateOpts.GatewayIP = &gatewayIP
 		}
@@ -326,28 +343,33 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 		if err = resourceSubnetDNSNameserversV2CheckIsSet(d); err != nil {
 			return err
 		}
+		hasChange = true
 		updateOpts.DNSNameservers = resourceSubnetDNSNameserversV2(d)
 	}
 
 	if d.HasChange("host_routes") {
+		hasChange = true
 		newHostRoutes := resourceSubnetHostRoutesV2(d)
 		updateOpts.HostRoutes = &newHostRoutes
 	}
 
 	if d.HasChange("enable_dhcp") {
+		hasChange = true
 		v := d.Get("enable_dhcp").(bool)
 		updateOpts.EnableDHCP = &v
 	}
 
 	if d.HasChange("allocation_pools") {
+		hasChange = true
 		updateOpts.AllocationPools = resourceSubnetAllocationPoolsV2(d)
 	}
 
-	log.Printf("[DEBUG] Updating Subnet %s with options: %+v", d.Id(), updateOpts)
-
-	_, err = subnets.Update(networkingClient, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error updating OpenStack Neutron Subnet: %s", err)
+	if hasChange {
+		log.Printf("[DEBUG] Updating Subnet %s with options: %+v", d.Id(), updateOpts)
+		_, err = subnets.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack Neutron Subnet: %s", err)
+		}
 	}
 
 	if d.HasChange("tags") {

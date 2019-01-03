@@ -10,7 +10,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
+	snapshots_v2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots"
+	snapshots_v3 "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/snapshots"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls"
@@ -297,18 +298,6 @@ func (opts RuleCreateOpts) ToRuleCreateMap() (map[string]interface{}, error) {
 	return b, nil
 }
 
-// ServerGroupCreateOpts represents the attributes used when creating a new router.
-type ServerGroupCreateOpts struct {
-	servergroups.CreateOpts
-	ValueSpecs map[string]string `json:"value_specs,omitempty"`
-}
-
-// ToServerGroupCreateMap casts a CreateOpts struct to a map.
-// It overrides routers.ToServerGroupCreateMap to add the ValueSpecs field.
-func (opts ServerGroupCreateOpts) ToServerGroupCreateMap() (map[string]interface{}, error) {
-	return BuildRequest(opts, "server_group")
-}
-
 // SubnetCreateOpts represents the attributes used when creating a new subnet.
 type SubnetCreateOpts struct {
 	subnets.CreateOpts
@@ -383,4 +372,40 @@ type EndpointGroupCreateOpts struct {
 type SiteConnectionCreateOpts struct {
 	siteconnections.CreateOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+}
+
+// blockStorageV2SnapshotSort represents a sortable slice of block storage
+// v2 snapshots.
+type blockStorageV2SnapshotSort []snapshots_v2.Snapshot
+
+func (snaphot blockStorageV2SnapshotSort) Len() int {
+	return len(snaphot)
+}
+
+func (snaphot blockStorageV2SnapshotSort) Swap(i, j int) {
+	snaphot[i], snaphot[j] = snaphot[j], snaphot[i]
+}
+
+func (snaphot blockStorageV2SnapshotSort) Less(i, j int) bool {
+	itime := snaphot[i].CreatedAt
+	jtime := snaphot[j].CreatedAt
+	return itime.Unix() < jtime.Unix()
+}
+
+// blockStorageV3SnapshotSort represents a sortable slice of block storage
+// v3 snapshots.
+type blockStorageV3SnapshotSort []snapshots_v3.Snapshot
+
+func (snaphot blockStorageV3SnapshotSort) Len() int {
+	return len(snaphot)
+}
+
+func (snaphot blockStorageV3SnapshotSort) Swap(i, j int) {
+	snaphot[i], snaphot[j] = snaphot[j], snaphot[i]
+}
+
+func (snaphot blockStorageV3SnapshotSort) Less(i, j int) bool {
+	itime := snaphot[i].CreatedAt
+	jtime := snaphot[j].CreatedAt
+	return itime.Unix() < jtime.Unix()
 }

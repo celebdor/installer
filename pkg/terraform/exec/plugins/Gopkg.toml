@@ -22,7 +22,7 @@ ignored = [
 
 [[constraint]]
   name = "github.com/terraform-providers/terraform-provider-openstack"
-  version = "1.12.0"
+  version = "1.13.0"
 
 [[override]]
   name = "github.com/coreos/ignition"

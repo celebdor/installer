@@ -203,36 +203,40 @@ func resourceLoadBalancerV2Update(d *schema.ResourceData, meta interface{}) erro
 
 	var updateOpts loadbalancers.UpdateOpts
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 	if d.HasChange("description") {
-		updateOpts.Description = d.Get("description").(string)
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
 	}
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
 	}
 
-	// Wait for LoadBalancer to become active before continuing
-	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2LoadBalancer(lbClient, d.Id(), "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
-	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = loadbalancers.Update(lbClient, d.Id(), updateOpts).Extract()
+	if updateOpts != (loadbalancers.UpdateOpts{}) {
+		// Wait for LoadBalancer to become active before continuing
+		timeout := d.Timeout(schema.TimeoutUpdate)
+		err = waitForLBV2LoadBalancer(lbClient, d.Id(), "ACTIVE", nil, timeout)
 		if err != nil {
-			return checkForRetryableError(err)
+			return err
 		}
-		return nil
-	})
 
-	// Wait for LoadBalancer to become active before continuing
-	err = waitForLBV2LoadBalancer(lbClient, d.Id(), "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
+		log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
+		err = resource.Retry(timeout, func() *resource.RetryError {
+			_, err = loadbalancers.Update(lbClient, d.Id(), updateOpts).Extract()
+			if err != nil {
+				return checkForRetryableError(err)
+			}
+			return nil
+		})
+
+		// Wait for LoadBalancer to become active before continuing
+		err = waitForLBV2LoadBalancer(lbClient, d.Id(), "ACTIVE", nil, timeout)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Security Groups get updated separately
