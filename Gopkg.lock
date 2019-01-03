@@ -209,12 +209,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fa54599c286d2e349f4d64a10fe2259aeb6598a8d96e98a5878df22cf5e4ba41"
+  digest = "1:b99539429d780eb496e490805d97fa419b11ffcda43abb859a3550ff3c8f93e7"
   name = "github.com/gophercloud/gophercloud"
   packages = [
     ".",
     "internal",
     "openstack",
+    "openstack/common/extensions",
     "openstack/compute/v2/flavors",
     "openstack/compute/v2/images",
     "openstack/compute/v2/servers",
@@ -223,6 +224,7 @@
     "openstack/identity/v3/regions",
     "openstack/identity/v3/tokens",
     "openstack/imageservice/v2/images",
+    "openstack/networking/v2/extensions",
     "openstack/networking/v2/extensions/layer3/floatingips",
     "openstack/networking/v2/extensions/layer3/routers",
     "openstack/networking/v2/extensions/security/groups",
@@ -849,9 +851,11 @@
     "github.com/coreos/ignition/config/v2_2/types",
     "github.com/ghodss/yaml",
     "github.com/golang/mock/gomock",
+    "github.com/gophercloud/gophercloud/openstack/compute/v2/flavors",
     "github.com/gophercloud/gophercloud/openstack/compute/v2/servers",
     "github.com/gophercloud/gophercloud/openstack/identity/v3/regions",
     "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images",
+    "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions",
     "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips",
     "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers",
     "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups",
