@@ -42,6 +42,17 @@ func ValidatePlatform(p *openstack.Platform, fldPath *field.Path, fetcher ValidV
 		} else if !isValidValue(p.FlavorName, validFlavors) {
 			allErrs = append(allErrs, field.NotSupported(fldPath.Child("computeFlavor"), p.FlavorName, validFlavors))
 		}
+
+		catalogTypes := fetcher.GetCatalogServiceTypes(p.Cloud)
+		if err != nil {
+			allErrs = append(allErrs, field.InternalError(fldPath.Child("OctaviaSupport"), errors.New("could not retrieve service catalog types")))
+		} else {
+			if isValidValue("load-balancer", netExts) {
+				p.OctaviaSupport = "1"
+			} else {
+				p.OctaviaSupport = "0"
+			}
+		}
 	}
 	if p.DefaultMachinePlatform != nil {
 		allErrs = append(allErrs, ValidateMachinePool(p.DefaultMachinePlatform, fldPath.Child("defaultMachinePlatform"))...)

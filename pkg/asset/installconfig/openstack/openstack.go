@@ -159,6 +159,18 @@ func Platform() (*openstack.Platform, error) {
 		return nil, err
 	}
 
+	catalogServiceTypes, err := validValuesFetcher.GetCatalogServiceTypes(cloud)
+	if err != nil {
+		return nil, err
+	}
+	sort.Strings(catalogServiceTypes)
+	i := sort.SearchStrings(catalogServiceTypes, "load-balancer")
+	var ocataviaSupport string
+	if i == len(catalogServiceTypes) || catalogServiceTypes[i] != "load-balancer" {
+		ocataviaSupport = "0"
+	} else {
+		ocataviaSupport = "1"
+	}
 	return &openstack.Platform{
 		NetworkCIDRBlock: *defaultNetworkCIDR,
 		Region:           region,
@@ -166,5 +178,6 @@ func Platform() (*openstack.Platform, error) {
 		Cloud:            cloud,
 		ExternalNetwork:  extNet,
 		FlavorName:       flavor,
+		OctaviaSupport:   octaviaSupport,
 	}, nil
 }

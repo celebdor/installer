@@ -121,6 +121,7 @@ func TFVars(cfg *types.InstallConfig, bootstrapIgn, masterIgn string) ([]byte, e
 		config.OpenStack.Credentials.Cloud = cfg.Platform.OpenStack.Cloud
 		config.OpenStack.ExternalNetwork = cfg.Platform.OpenStack.ExternalNetwork
 		config.OpenStack.Master.FlavorName = cfg.Platform.OpenStack.FlavorName
+		config.OpenStack.OctaviaSupport = cfg.Platform.OpenStack.OctaviaSupport
 	}
 
 	return json.MarshalIndent(config, "", "  ")

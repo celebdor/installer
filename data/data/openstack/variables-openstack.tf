@@ -252,3 +252,11 @@ Block of IP addresses used by the VPC.
 This should not overlap with any other networks, such as a private datacenter connected via Direct Connect.
 EOF
 }
+
+variable "openstack_octavia_support" {
+  type = "string"
+
+  description = <<EOF
+Contains 0 if the OpenStack octavia service is not present in the service catalog and 1 if it is.
+EOF
+}

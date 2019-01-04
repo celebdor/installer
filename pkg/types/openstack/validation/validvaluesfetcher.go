@@ -14,4 +14,6 @@ type ValidValuesFetcher interface {
 	GetNetworkNames(cloud string) ([]string, error)
 	// GetFlavorNames gets the valid flavor names.
 	GetFlavorNames(cloud string) ([]string, error)
+	// GetCatalogServiceTypes gets the available service types
+	GetCatalogServiceTypes(cloud string) ([]string, error)
 }

@@ -33,4 +33,8 @@ type Platform struct {
 	// FlavorName
 	// The OpenStack compute flavor to use for servers.
 	FlavorName string `json:"computeFlavor"`
+
+	// OctaviaSupport
+	// Whether the current cloud has Octavia in the Catalog
+	OctaviaSupport string `json:"octaviaSupport"`
 }

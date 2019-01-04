@@ -3,6 +3,7 @@ package validation
 import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/regions"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/utils/openstack/clientconfig"
@@ -148,4 +149,28 @@ func (f realValidValuesFetcher) GetFlavorNames(cloud string) ([]string, error) {
 	}
 
 	return flavorNames, nil
+}
+
+// GetCatalogServiceTypes gets the available service types
+func (f realValidValuesFetcher) GetCatalogServiceTypes(cloud string) ([]string, error) {
+	opts := &clientconfig.ClientOpts{
+		Cloud: cloud,
+	}
+
+	conn, err := clientconfig.NewServiceClient("identity", opts)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err := tokens.Get(client, conn.Token()).ExtractServiceCatalog()
+
+	if err != nil {
+		return nil, err
+	}
+	types := make([]string, len(sc.Entries))
+	for i, entry := range sc.Entries {
+		types[i] = entry.Type
+	}
+
+	return types, nil
 }
